@@ -1,0 +1,75 @@
+CREATE DATABASE school_assets;
+USE school_assets;
+
+-- --------------------------------------------------------
+-- Lookup / Reference Tables (1NF → 2NF → 3NF foundation)
+-- --------------------------------------------------------
+
+CREATE TABLE departments (
+    department_id INT AUTO_INCREMENT PRIMARY KEY,
+    department_name VARCHAR(100) UNIQUE NOT NULL
+);
+
+CREATE TABLE categories (
+    category_id INT AUTO_INCREMENT PRIMARY KEY,
+    category_name VARCHAR(50) UNIQUE NOT NULL
+);
+
+CREATE TABLE locations (
+    location_id INT AUTO_INCREMENT PRIMARY KEY,
+    location_name VARCHAR(100) UNIQUE NOT NULL
+);
+
+-- --------------------------------------------------------
+-- Core Tables
+-- --------------------------------------------------------
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    full_name VARCHAR(100) NOT NULL,
+    role ENUM('Admin', 'Staff') NOT NULL,
+    department_id INT,
+    FOREIGN KEY (department_id) REFERENCES departments(department_id)
+);
+
+CREATE TABLE assets (
+    equipment_id VARCHAR(50) PRIMARY KEY,
+    resource_name VARCHAR(100) NOT NULL,
+    category_id INT NOT NULL,
+    status ENUM('Available', 'Reserved', 'In-Use', 'Under Maintenance') DEFAULT 'Available',
+    location_id INT,
+    assigned_to INT NULL,
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (category_id) REFERENCES categories(category_id),
+    FOREIGN KEY (location_id) REFERENCES locations(location_id),
+    FOREIGN KEY (assigned_to) REFERENCES users(id)
+);
+
+-- --------------------------------------------------------
+-- Seed Data
+-- --------------------------------------------------------
+
+INSERT INTO departments (department_name) VALUES
+('IT Department'),
+('Computer Science'),
+('Electronics');
+
+INSERT INTO categories (category_name) VALUES
+('IT Equipment'),
+('Laboratory');
+
+INSERT INTO locations (location_name) VALUES
+('CS Department'),
+('Room 301'),
+('Electronics Lab');
+
+INSERT INTO users (email, password, full_name, role, department_id) VALUES
+('admin@itdept.edu', 'password123', 'IT Administrator', 'Admin', 1),
+('faculty@dept.edu', 'password123', 'Dr. Sarah Johnson', 'Staff', 2);
+
+INSERT INTO assets (equipment_id, resource_name, category_id, status, location_id, assigned_to) VALUES
+('IT-LAP-001', 'Dell Latitude 7420', 1, 'In-Use', 1, 2),
+('IT-PRJ-001', 'Epson EB-2250U', 1, 'Available', 2, NULL),
+('LAB-OSC-001', 'Digital Oscilloscope', 2, 'Reserved', 3, NULL);
